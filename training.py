@@ -62,7 +62,7 @@ class NeuralProcessTrainer():
                 self.optimizer.zero_grad()
 
                 # Sample number of context and target points
-                num_context = randint(*self.num_context_range)
+                num_context = randint(*self.num_context_range)  #since num_context_range is a tuple, use * to allow variable length of parameters
                 num_extra_target = randint(*self.num_extra_target_range)
 
                 # Create context and target points and apply neural process

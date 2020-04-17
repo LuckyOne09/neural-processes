@@ -28,6 +28,7 @@ class Encoder(nn.Module):
         self.h_dim = h_dim
         self.r_dim = r_dim
 
+        # concat (context_x,context_y) as input pair
         layers = [nn.Linear(x_dim + y_dim, h_dim),
                   nn.ReLU(inplace=True),
                   nn.Linear(h_dim, h_dim),

@@ -11,7 +11,7 @@ def context_target_split(x, y, num_context, num_extra_target):
     Parameters
     ----------
     x : torch.Tensor
-        Shape (batch_size, num_points, x_dim)
+        Shape (batch_size, num_points, x_dim) num_points
 
     y : torch.Tensor
         Shape (batch_size, num_points, y_dim)

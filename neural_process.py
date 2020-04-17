@@ -114,11 +114,11 @@ class NeuralProcess(nn.Module):
             mu_target, sigma_target = self.xy_to_mu_sigma(x_target, y_target)
             mu_context, sigma_context = self.xy_to_mu_sigma(x_context, y_context)
             # Sample from encoded distribution using reparameterization trick
-            q_target = Normal(mu_target, sigma_target)
-            q_context = Normal(mu_context, sigma_context)
+            q_target = Normal(mu_target, sigma_target)          #p(z | X[1:n],y[1:n])
+            q_context = Normal(mu_context, sigma_context)       #p(z | X[1:m])
             z_sample = q_target.rsample()
             # Get parameters of output distribution
-            y_pred_mu, y_pred_sigma = self.xz_to_y(x_target, z_sample)
+            y_pred_mu, y_pred_sigma = self.xz_to_y(x_target, z_sample)  #p(y | x[1:n],z)
             p_y_pred = Normal(y_pred_mu, y_pred_sigma)
 
             return p_y_pred, q_target, q_context
