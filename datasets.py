@@ -1,10 +1,85 @@
 import glob
 import numpy as np
 import torch
+import os
+import pandas as pd
 from math import pi
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, transforms
+from dataProcessing import readFromCSV
+
+class FaceFeatureData(Dataset):
+    """
+    Dataset of face feature vectors extracted from FG-NET by FaceNet dimension reduction.
+    size of pair (x,y): size of x is 2048, size of y is 1
+
+    Parameters
+    ----------
+
+    featureVectors:
+        each of featureVectors is (x,y)
+        x.size():
+        data from extracted feature vector pre-processed by FaceNet
+
+    num_samples: num of people in dataset
+
+    num_points: num_of_images of each people
+
+    """
+
+    def __init__(self,num_of_people=82,num_of_images=18):
+        self.num_samples = num_of_people
+        self.num_points = num_of_images
+        self.x_dim = 2048  # x and y dim are fixed for this dataset.
+        self.y_dim = 1
+
+        self.featureVectors = []
+        filePath = r'D:\PycharmProjects\ANP\neural-processes-oxford\FeatureVector'
+        csvs = os.listdir(filePath)
+        FeatureCSVs = map(lambda x: os.path.join(filePath, x), csvs)
+        # featureVectors size():
+        # (#people(82),#image of each person(18),#features in each image(2048))
+        for root_dir in FeatureCSVs:
+            ageVecotr, featureVector = readFromCSV(root_dir)
+            ageTensor = torch.FloatTensor(ageVecotr).unsqueeze(1)
+            featureTensor = torch.FloatTensor(featureVector)
+            self.featureVectors.append((featureTensor,ageTensor))
+
+    def __getitem__(self, index):
+        return self.featureVectors[index]
+
+    def __len__(self):
+        #self.numsample == len(self.featureVectors)
+        return self.num_samples
+
+class FaceFeatureTestData(Dataset):
+    """
+    Dataset of face feature vectors seperated from FG-NET by FaceNet dimension reduction for testint
+    size of pair (x,y): size of x is 2048, size of y is 1
+    """
+
+    def __init__(self):
+
+        self.x_dim = 2048  # x and y dim are fixed for this dataset.
+        self.y_dim = 1
+
+        testFilePath = r'D:\PycharmProjects\ANP\neural-processes-oxford\TestFeatureVector'
+        csvs = os.listdir(testFilePath)
+        FeatureCSVs = map(lambda x: os.path.join(testFilePath, x), csvs)
+        self.testVectors = []
+        for root_dir in FeatureCSVs:
+            ageVecotr, featureVector = readFromCSV(root_dir)
+            ageTensor = torch.FloatTensor(ageVecotr).unsqueeze(1)
+            featureTensor = torch.FloatTensor(featureVector)
+            self.testVectors.append((featureTensor, ageTensor))
+
+    def __getitem__(self, index):
+        return self.testVectors[index]
+
+    def __len__(self):
+        #self.numsample == len(self.featureVectors)
+        return len(self.testVectors)
 
 
 class SineData(Dataset):
@@ -28,6 +103,47 @@ class SineData(Dataset):
     num_points : int
         Number of points at which to evaluate f(x) for x in [-pi, pi].
     """
+    def __init__(self, amplitude_range=(-1., 1.), shift_range=(-.5, .5),
+                 num_samples=1000, num_points=100):
+        self.amplitude_range = amplitude_range
+        self.shift_range = shift_range
+        self.num_samples = num_samples
+        self.num_points = num_points
+        self.x_dim = 1  # x and y dim are fixed for this dataset.
+        self.y_dim = 1
+
+        # Generate data
+        self.data = []
+        a_min, a_max = amplitude_range
+        b_min, b_max = shift_range
+        for i in range(num_samples):
+            # Sample random amplitude
+            a = (a_max - a_min) * np.random.rand() + a_min
+            # Sample random shift
+            b = (b_max - b_min) * np.random.rand() + b_min
+            # Shape (num_points, x_dim)
+            x = torch.linspace(-pi, pi, num_points).unsqueeze(1)
+            # Shape (num_points, y_dim)
+            y = a * torch.sin(x - b)
+            self.data.append((x, y))
+
+    def __getitem__(self, index):
+        return self.data[index]
+
+    def __len__(self):
+        return self.num_samples
+
+
+class SineDataForMTL(Dataset):
+    """
+    Dataset of functions f(x) = a * sin(x - b) where a and b are specified
+    Another verison of SineData for MTL purpose
+
+    Parameters
+    ----------
+
+    """
+
     def __init__(self, amplitude_range=(-1., 1.), shift_range=(-.5, .5),
                  num_samples=1000, num_points=100):
         self.amplitude_range = amplitude_range

@@ -1,15 +1,12 @@
-import numpy as np
 import torch
+from math import pi
+import os
 
-# locations = np.random.choice(100,
-#                              size=4 + 2,
-#                              replace=False)
-# print(locations)
-#
-# a = np.arange(100)
-# print(a)
+from datasets import FaceFeatureData
 
-b = torch.tensor([1,2,3])
-print(b)
+# Create dataset
 
-print(b.contiguous())
+ageVector = [[40, 22, 8, 18, 19, 43, 14, 33, 43, 16, 2, 28, 14, 29, 18, 5, 10, 2]]
+
+ageTensor = torch.FloatTensor(ageVector)
+print(ageTensor)
