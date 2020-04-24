@@ -1,65 +1,49 @@
-# Neural Processes
+# Age Estimation based on Multi-task Neural Process
 
 Pytorch implementation of [Neural Processes](https://arxiv.org/abs/1807.01622). This repo follows the
 best practices defined in [Empirical Evaluation of Neural Process Objectives](http://bayesiandeeplearning.org/2018/papers/92.pdf).
 
-## Examples
+## Computational Graph
 
-#### Function regression
+some notations: 
 
-<img src="https://github.com/EmilienDupont/neural-processes/raw/master/imgs/np_1d.gif" width="400">
+​	trainingSet1: for 1st training on whole training set
 
-#### Image inpainting
+​	person<sub>1...N</sub> : components of trainSet1 (separated from trainSet1 by each person)
 
-<img src="https://github.com/EmilienDupont/neural-processes/raw/master/imgs/celeba.gif" width="256">
+​	trainingSet2: for MergeNet training (completely different with trainingSet1)
 
-## Usage
+### Training Round 1
 
-Simple example of training a neural process on functions or images.
+trainingSet1 ====>  NP model  ====> pretrained model1(PM1)
 
-```python
-import torch
-from neural_process import NeuralProcess, NeuralProcessImg
-from training import NeuralProcessTrainer
+### Training Round 2
 
-# Define neural process for functions...
-neuralprocess = NeuralProcess(x_dim=1, y_dim=1, r_dim=10, z_dim=10, h_dim=10)
+Person1 ====>  PM1  ====> pretrained model2<sub>1</sub> (PM2<sub>1</sub>)
 
-# ...or for images
-neuralprocess = NeuralProcessImg(img_size=(3, 32, 32), r_dim=128, z_dim=128,
-                                 h_dim=128)
+Person2 ====>  PM1  ====> PM2<sub>2</sub>
 
-# Define optimizer and trainer
-optimizer = torch.optim.Adam(neuralprocess.parameters(), lr=3e-4)
-np_trainer = NeuralProcessTrainer(device, neuralprocess, optimizer,
-                                  num_context_range=(3, 20),
-                                  num_extra_target_range=(5, 10))
+……
 
-# Train on your data
-np_trainer.train(data_loader, epochs=30)
-```
+……
+PersonN ====>  PM1  ====> PM2<sub>N</sub>
 
-### 1D functions
+### Training Round 3
 
-For a detailed tutorial on training and using neural processes on 1d functions, see
-the notebook `example-1d.ipynb`.
+trainingSet2  ====>  PM2<sub>1</sub>   ====>   |						 |  
 
-### Images
+trainingSet2  ====>  PM2<sub>2</sub>   ====>   |		Merge	  |
 
-To train an image model, use `python main_experiment.py config.json`. This will log information about training and save model weights.
+……														 |		Net		   |  ====>   estimating age
 
-For a detailed tutorial on how to load a trained model and how to use neural processes for inpainting, see the notebook `example-img`. Trained models for MNIST and CelebA are also provided in the `trained_models` folder.
+……
+trainingSet2  ====>  PM2<sub>N</sub>   ====>  |				          |
 
-Note, to train on CelebA you will have to download the data from [here](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html).
 
-## Acknowledgements
 
-Several people at [OxCSML](https://twitter.com/oxcsml) helped me understand various aspects of neural processes, especially [Kaspar Martens](http://csml.stats.ox.ac.uk/people/martens/), [Jin Xu](http://csml.stats.ox.ac.uk/people/xu/), Jef Ton and [Hyunjik Kim](http://csml.stats.ox.ac.uk/people/kim/).
+## TODO
 
-Useful resources:
-* Kaspar's [blog post](https://kasparmartens.rbind.io/post/np/)
-* Official TensorFlow [implementation](https://github.com/deepmind/neural-processes)
+The model is just a toy model now.
 
-## License
+we haven't finetune it and maybe we should add more hidden layers to improve the performance
 
-MIT

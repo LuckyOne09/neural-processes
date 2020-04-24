@@ -28,11 +28,12 @@ class FaceFeatureData(Dataset):
 
     """
 
-    def __init__(self,num_of_people=82,num_of_images=18):
+    def __init__(self,num_of_people=82,num_of_images=18,index = None):
         self.num_samples = num_of_people
         self.num_points = num_of_images
         self.x_dim = 2048  # x and y dim are fixed for this dataset.
         self.y_dim = 1
+        self.indexing = index
 
         self.featureVectors = []
         filePath = r'D:\PycharmProjects\ANP\neural-processes-oxford\FeatureVector'
@@ -40,17 +41,23 @@ class FaceFeatureData(Dataset):
         FeatureCSVs = map(lambda x: os.path.join(filePath, x), csvs)
         # featureVectors size():
         # (#people(82),#image of each person(18),#features in each image(2048))
-        for root_dir in FeatureCSVs:
+        for idx, root_dir in enumerate(FeatureCSVs):
             ageVecotr, featureVector = readFromCSV(root_dir)
             ageTensor = torch.FloatTensor(ageVecotr).unsqueeze(1)
             featureTensor = torch.FloatTensor(featureVector)
-            self.featureVectors.append((featureTensor,ageTensor))
+            if index is not None:
+                if idx == index:
+                    self.featureVectors.append((featureTensor,ageTensor))
+            else:
+                self.featureVectors.append((featureTensor, ageTensor))
 
     def __getitem__(self, index):
         return self.featureVectors[index]
 
     def __len__(self):
         #self.numsample == len(self.featureVectors)
+        if self.indexing is not None:
+            return 1
         return self.num_samples
 
 class FaceFeatureTestData(Dataset):
@@ -59,12 +66,11 @@ class FaceFeatureTestData(Dataset):
     size of pair (x,y): size of x is 2048, size of y is 1
     """
 
-    def __init__(self):
+    def __init__(self,testFilePath = r'D:\PycharmProjects\ANP\neural-processes-oxford\TestFeatureVector'):
 
         self.x_dim = 2048  # x and y dim are fixed for this dataset.
         self.y_dim = 1
 
-        testFilePath = r'D:\PycharmProjects\ANP\neural-processes-oxford\TestFeatureVector'
         csvs = os.listdir(testFilePath)
         FeatureCSVs = map(lambda x: os.path.join(testFilePath, x), csvs)
         self.testVectors = []
