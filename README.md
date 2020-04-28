@@ -17,13 +17,13 @@ Training Set 2 consists of M groups of face images(Person<sub>n+1...n+m</sub>) w
 
 Firstly, using the Training Set 1 to train the original Neural Process to get the Pretrained Model 1 which we denote as PM1. We consider each person as a different task in this process. In this round, we used the whole training set to make NP learn all tasks together. In this way, the Pretrained Model we get contains a general encoder which shares the same parameters in different tasks. 
 
-![](.\figures\training_round_1.png)
+![](./figures/training_round_1.png)
 
 ### Training Round 2
 
 Then we train the PM1 separately with different Person<sub>i</sub> in Training Set 1 to get corresponding model PM<sub>2-i</sub>. In this process, the encoder part is fixed, we just use different task to train the decoder part. According to this, each PM<sub>2-i</sub> we get shares the same encoder part but possesses their unique decoder.
 
-![](.\figures\training_round_2.png)
+![](./figures/training_round_2.png)
 
 
 
@@ -31,7 +31,7 @@ Then we train the PM1 separately with different Person<sub>i</sub> in Training S
 
 In order to do the age estimation with all these pretrained model, there should be a Merge Net. The Merge Net is here to learn how to compute the similarity between the input images and our training subjects, and then provide the weight to each result we get from PM<sub>2-i</sub>. The sum of the products of weights and predictions we get from PM<sub>2-i</sub> will be the final estimating age.
 
-![](.\figures\training_round_3.png)
+![](./figures/training_round_3.png)
 
 
 
