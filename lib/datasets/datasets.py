@@ -2,12 +2,11 @@ import glob
 import numpy as np
 import torch
 import os
-import pandas as pd
 from math import pi
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, transforms
-from dataProcessing import readFromCSV
+from lib.datasets.dataProcessing import readFromCSV
 
 class FaceFeatureData(Dataset):
     """

@@ -1,11 +1,11 @@
 import torch
 from torch.utils.data import DataLoader
-from datasets import FaceFeatureData, FaceFeatureTestData
-from neural_process import NeuralProcess
-from training import NeuralProcessTrainer
-from utils import context_target_split
+from lib.datasets.datasets import FaceFeatureData, FaceFeatureTestData
+from lib.core.neural_process import NeuralProcess
+from lib.core.training import NeuralProcessTrainer
+from lib.utils.utils import context_target_split
 import os
-from mergeNet import MergeNet
+from lib.core.mergeNet import MergeNet
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -97,15 +97,9 @@ def ConstructInputToMergeNet(num_of_test_images,testData_loader):
                 mu = p_y_pred.loc.detach()
                 avg_mu += mu
             avg_mu = avg_mu / 10
-            print('avg_mu.size(): ',avg_mu.size())
-            print(avg_mu)
             avg_mu = avg_mu.view(18)
-            print('after view operation')
-            print('avg_mu.size(): ',avg_mu.size())
-            print(avg_mu)
             resultsOnPretrainedModel.append(avg_mu.tolist())
         resultsOnPretrainedModelsList.append(resultsOnPretrainedModel)
-    print(resultsOnPretrainedModelsList)
 
     resultsOnPretrainedModels = []
     for i in range(num_of_test_images):
