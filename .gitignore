@@ -36,6 +36,11 @@ MANIFEST
 *.manifest
 *.spec
 
+#scratchpaper
+scratch.ipynb
+
+#middle output
+middleOutput
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
