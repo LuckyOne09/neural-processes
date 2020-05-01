@@ -1,11 +1,10 @@
 import torch
-from lib.core.models import Encoder, MuSigmaEncoder, Decoder
 from torch import nn
 from torch.distributions import Normal
-from lib.utils.utils import img_mask_to_np_input
+from .models import Encoder, MuSigmaEncoder, Decoder
+from base import BaseModel
 
-
-class NeuralProcess(nn.Module):
+class NeuralProcess(BaseModel):
     """
     Implements Neural Process for functions of arbitrary dimensions.
 
@@ -134,55 +133,3 @@ class NeuralProcess(nn.Module):
 
             return p_y_pred
 
-
-class NeuralProcessImg(nn.Module):
-    """
-    Wraps regular Neural Process for image processing.
-
-    Parameters
-    ----------
-    img_size : tuple of ints
-        E.g. (1, 28, 28) or (3, 32, 32)
-
-    r_dim : int
-        Dimension of output representation r.
-
-    z_dim : int
-        Dimension of latent variable z.
-
-    h_dim : int
-        Dimension of hidden layer in encoder and decoder.
-    """
-    def __init__(self, img_size, r_dim, z_dim, h_dim):
-        super(NeuralProcessImg, self).__init__()
-        self.img_size = img_size
-        self.num_channels, self.height, self.width = img_size
-        self.r_dim = r_dim
-        self.z_dim = z_dim
-        self.h_dim = h_dim
-
-        self.neural_process = NeuralProcess(x_dim=2, y_dim=self.num_channels,
-                                            r_dim=r_dim, z_dim=z_dim,
-                                            h_dim=h_dim)
-
-    def forward(self, img, context_mask, target_mask):
-        """
-        Given an image and masks of context and target points, returns a
-        distribution over pixel intensities at the target points.
-
-        Parameters
-        ----------
-        img : torch.Tensor
-            Shape (batch_size, channels, height, width)
-
-        context_mask : torch.ByteTensor
-            Shape (batch_size, height, width). Binary mask indicating
-            the pixels to be used as context.
-
-        target_mask : torch.ByteTensor
-            Shape (batch_size, height, width). Binary mask indicating
-            the pixels to be used as target.
-        """
-        x_context, y_context = img_mask_to_np_input(img, context_mask)
-        x_target, y_target = img_mask_to_np_input(img, target_mask)
-        return self.neural_process(x_context, y_context, x_target, y_target)

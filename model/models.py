@@ -1,9 +1,9 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
+from base import BaseModel
 
-
-class Encoder(nn.Module):
+class Encoder(BaseModel):
     """Maps an (x_i, y_i) pair to a representation r_i.
 
     Parameters
@@ -48,8 +48,7 @@ class Encoder(nn.Module):
         input_pairs = torch.cat((x, y), dim=1)
         return self.input_to_hidden(input_pairs)
 
-
-class MuSigmaEncoder(nn.Module):
+class MuSigmaEncoder(BaseModel):
     """
     Maps a representation r to mu and sigma which will define the normal
     distribution from which we sample the latent variable z.
@@ -84,8 +83,7 @@ class MuSigmaEncoder(nn.Module):
         sigma = 0.1 + 0.9 * torch.sigmoid(self.hidden_to_sigma(hidden))
         return mu, sigma
 
-
-class Decoder(nn.Module):
+class Decoder(BaseModel):
     """
     Maps target input x_target and samples z (encoding information about the
     context points) to predictions y_target.
@@ -155,3 +153,24 @@ class Decoder(nn.Module):
         # Process Objectives" and "Attentive Neural Processes"
         sigma = 0.1 + 0.9 * F.softplus(pre_sigma)
         return mu, sigma
+
+class MergeNet(BaseModel):
+
+    def __init__(self,number_of_trained_people):
+        '''
+
+        :param number_of_trained_people: Indicating how many people in training set(which will be the input dimension of MergeNet)
+        '''
+        super(MergeNet, self).__init__()
+        self.input_size = number_of_trained_people
+        self.output_size = 1
+
+        self.fc = nn.Linear(self.input_size, self.output_size)
+
+    def forward(self,x_target):
+        '''
+        Given target points x_target,
+        returns predicted value as estimated age.
+        (We just combine the result of multiple neural process networks to realize multi-task training)
+        '''
+        return self.fc(x_target)
