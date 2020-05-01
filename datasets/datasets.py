@@ -36,7 +36,7 @@ class FaceFeatureData(Dataset):
         self.indexing = index
 
         self.featureVectors = []
-        filePath = r'.\datasets\FeatureVector'
+        filePath = r'D:\PycharmProjects\ANP\neural-processes\datasets\FeatureVector'
         csvs = os.listdir(filePath)
         FeatureCSVs = map(lambda x: os.path.join(filePath, x), csvs)
         # featureVectors size():
@@ -66,7 +66,7 @@ class FaceFeatureTestData(Dataset):
     size of pair (x,y): size of x is 2048, size of y is 1
     """
 
-    def __init__(self,testFilePath = r'.\datasets\TestFeatureVector'):
+    def __init__(self,testFilePath = r'D:\PycharmProjects\ANP\neural-processes\datasets\TestFeatureVector'):
 
         self.x_dim = 2048  # x and y dim are fixed for this dataset.
         self.y_dim = 1
@@ -186,7 +186,7 @@ def ConstructInputToMergeNet(num_of_test_images,testData_loader):
                                                       num_context,
                                                       num_target)
 
-    modelPath = r'.\trained_models\age_estimation\smallTrained'
+    modelPath = r'D:\PycharmProjects\ANP\neural-processes\trained_models\age_estimation\smallTrained'
     models = os.listdir(modelPath)
     smallModels = map(lambda x: os.path.join(modelPath, x), models)
 
@@ -196,7 +196,7 @@ def ConstructInputToMergeNet(num_of_test_images,testData_loader):
     for idx, root_dir in enumerate(smallModels):
         #load model
         testNeuralprocess = NeuralProcess(x_dim, y_dim, r_dim, z_dim, h_dim)
-        testModelPath = r'.\trained_models\age_estimation\smallTrained\smallTrained' + str(idx) + r'.ckpt'
+        testModelPath = r'D:\PycharmProjects\ANP\neural-processes\trained_models\age_estimation\smallTrained\smallTrained' + str(idx) + r'.ckpt'
         testNeuralprocess.load_state_dict(torch.load(testModelPath))
         testNeuralprocess.training = False
 

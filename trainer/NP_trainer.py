@@ -118,7 +118,7 @@ class NeuralProcessTrainer(BaseTrainer):
         return -log_likelihood + kl
 
     @classmethod
-    def context_target_split(x, y, num_context, num_extra_target):
+    def context_target_split(cls,x, y, num_context, num_extra_target):
         """Given inputs x and their value y, return random subsets of points for
         context and target. Note that following conventions from "Empirical
         Evaluation of Neural Process Objectives" the context points are chosen as a

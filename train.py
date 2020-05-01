@@ -61,8 +61,11 @@ for idx in range(num_of_people):
         path = r'.\trained_models\age_estimation\smallTrained\smallTrained' + str(idx) + r'.ckpt'
         torch.save(smallNeuralprocess.state_dict(), path)
 
-x, y = data_loader[0]
-x_context, y_context, _, _ = NeuralProcessTrainer.context_target_split(x[0:1], y[0:1],
+for batch in data_loader:
+    break
+# Use batch to create random set of context points
+x, y = batch
+x_context, y_context, _, _ =  NeuralProcessTrainer.context_target_split(x[0:1], y[0:1],
                                                   num_context,
                                                   num_target)
 
