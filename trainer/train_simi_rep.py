@@ -109,7 +109,7 @@ for epoch in range(simiEpoch):
             avg_mu = avg_mu / 10
             avg_mu = avg_mu.view(18)
             resultsOnPretrainedModelsList.append(avg_mu.tolist())
-    # cnt += 1
+    cnt += 1
     resultsOnPretrainedModelsList = torch.FloatTensor(resultsOnPretrainedModelsList)
     pred_age = torch.zeros(18,1)
     # column
@@ -121,7 +121,7 @@ for epoch in range(simiEpoch):
     pred_age = torch.FloatTensor(pred_age)
     pred_age = pred_age.view(num_of_images,1)
     loss = criterion(pred_age, target_y)
-    loss.backward()
+    loss.backward(retain_graph=True)
     simiOptimizer.step()
     print("Epoch: {}, loss: {}".format(epoch, loss))
     simi_loss_history.append(loss)
