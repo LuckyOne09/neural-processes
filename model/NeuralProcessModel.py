@@ -76,6 +76,18 @@ class NeuralProcess(BaseModel):
         # Return parameters of distribution
         return self.r_to_mu_sigma(r)
 
+    """
+    Test part
+    """
+    def xy_to_rep(self, x, y):
+        batch_size, num_points, _ = x.size()
+        # Flatten tensors, as encoder expects one dimensional inputs
+        x_flat = x.view(batch_size * num_points, self.x_dim)
+        y_flat = y.contiguous().view(batch_size * num_points, self.y_dim)
+        # Encode each point into a representation r_i
+        r_i_flat = self.xy_to_r(x_flat, y_flat)
+        return r_i_flat
+
     def forward(self, x_context, y_context, x_target, y_target=None):
         """
         Given context pairs (x_context, y_context) and target points x_target,
