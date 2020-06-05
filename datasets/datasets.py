@@ -26,6 +26,8 @@ class FaceFeatureData(Dataset):
 
     num_points: num_of_images of each people
 
+    index: select correspoinding data for computing specific people's trained model
+
     """
 
     def __init__(self,num_of_people=82,num_of_images=18,index = None):
@@ -33,8 +35,8 @@ class FaceFeatureData(Dataset):
         self.num_points = num_of_images
         self.x_dim = 2048  # x and y dim are fixed for this dataset.
         self.y_dim = 1
-        self.indexing = index
 
+        self.indexing = index
         self.featureVectors = []
         filePath = r'D:\PycharmProjects\ANP\neural-processes\datasets\FeatureVector'
         csvs = os.listdir(filePath)
