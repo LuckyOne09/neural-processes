@@ -77,12 +77,9 @@ for epoch in range(simiEpoch):
 
 
     simiOptimizer.zero_grad()
-    context = torch.cat(context,dim=0)
-
+    simi_rep_list = []
     for r in context:
         simi_rep_list.append(simi(r, isContext=True))
-    simi_rep_list = simi(context, isContext = False)
-    print(simi_rep_list.size())
     context_simi_rep = torch.stack(simi_rep_list,dim=0)
     target_simi_rep = simi(target_x, isContext=False)
     mergeNet = MergeNet(context_simi_rep=context_simi_rep, target_simi_rep=target_simi_rep)
