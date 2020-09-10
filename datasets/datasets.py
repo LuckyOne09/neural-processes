@@ -5,8 +5,8 @@ from math import pi
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 
-from model.NeuralProcessModel import NeuralProcess
-from trainer import NeuralProcessTrainer
+# from model.NeuralProcessModel import NeuralProcess
+# from trainer import NeuralProcessTrainer
 
 
 class FaceFeatureData(Dataset):
@@ -38,7 +38,7 @@ class FaceFeatureData(Dataset):
 
         self.indexing = index
         self.featureVectors = []
-        filePath = r'D:\PycharmProjects\ANP\neural-processes\datasets\FeatureVector'
+        filePath = r'./datasets/FeatureVector'
         csvs = os.listdir(filePath)
         FeatureCSVs = map(lambda x: os.path.join(filePath, x), csvs)
         # featureVectors size():
@@ -167,60 +167,60 @@ def toFeatureVector(x,row_num):
                 print(ex)
     return features
 
-def ConstructInputToMergeNet(num_of_test_images,testData_loader):
-    x_dim = 2048
-    y_dim = 1
-    r_dim = 50  # Dimension of representation of context points
-    z_dim = 50  # Dimension of sampled latent variable
-    h_dim = 50  #
-    num_of_people = 3
-    num_of_images = 18
-    batch_size = 1
-    num_context = 17
-    num_target = 1
-    dataset = FaceFeatureData(num_of_people=num_of_people,num_of_images=num_of_images)
-    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    for batch in data_loader:
-        break
-    # Use batch to create random set of context points
-    x, y = batch
-    x_context, y_context, _, _ = NeuralProcessTrainer.context_target_split(x[0:1], y[0:1],
-                                                      num_context,
-                                                      num_target)
-
-    modelPath = r'D:\PycharmProjects\ANP\neural-processes\trained_models\age_estimation\smallTrained'
-    models = os.listdir(modelPath)
-    smallModels = map(lambda x: os.path.join(modelPath, x), models)
-
-
-    test_target = 0
-    resultsOnPretrainedModelsList = []
-    for idx, root_dir in enumerate(smallModels):
-        #load model
-        testNeuralprocess = NeuralProcess(x_dim, y_dim, r_dim, z_dim, h_dim)
-        testModelPath = r'D:\PycharmProjects\ANP\neural-processes\trained_models\age_estimation\smallTrained\smallTrained' + str(idx) + r'.ckpt'
-        testNeuralprocess.load_state_dict(torch.load(testModelPath))
-        testNeuralprocess.training = False
-
-        resultsOnPretrainedModel = []
-        for x_target, y_target in testData_loader:
-            test_target = y_target
-            avg_mu = 0
-            for i in range(10):
-                p_y_pred = testNeuralprocess(x_context, y_context, x_target)
-                # Extract mean of distribution
-                mu = p_y_pred.loc.detach()
-                avg_mu += mu
-            avg_mu = avg_mu / 10
-            avg_mu = avg_mu.view(18)
-            resultsOnPretrainedModel.append(avg_mu.tolist())
-        resultsOnPretrainedModelsList.append(resultsOnPretrainedModel)
-
-    resultsOnPretrainedModels = []
-    for i in range(num_of_test_images):
-        resultsWithSinglePerson = []
-        for list in resultsOnPretrainedModelsList:
-            resultsWithSinglePerson.append(list[0][i])
-        resultsOnPretrainedModels.append(resultsWithSinglePerson)
-    resultsOnPretrainedModels = torch.FloatTensor(resultsOnPretrainedModels)
-    return resultsOnPretrainedModels
+# def ConstructInputToMergeNet(num_of_test_images,testData_loader):
+#     x_dim = 2048
+#     y_dim = 1
+#     r_dim = 50  # Dimension of representation of context points
+#     z_dim = 50  # Dimension of sampled latent variable
+#     h_dim = 50  #
+#     num_of_people = 3
+#     num_of_images = 18
+#     batch_size = 1
+#     num_context = 17
+#     num_target = 1
+#     dataset = FaceFeatureData(num_of_people=num_of_people,num_of_images=num_of_images)
+#     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+#     for batch in data_loader:
+#         break
+#     # Use batch to create random set of context points
+#     x, y = batch
+#     x_context, y_context, _, _ = NeuralProcessTrainer.context_target_split(x[0:1], y[0:1],
+#                                                       num_context,
+#                                                       num_target)
+#
+#     modelPath = r'D:\PycharmProjects\ANP\neural-processes\trained_models\age_estimation\smallTrained'
+#     models = os.listdir(modelPath)
+#     smallModels = map(lambda x: os.path.join(modelPath, x), models)
+#
+#
+#     test_target = 0
+#     resultsOnPretrainedModelsList = []
+#     for idx, root_dir in enumerate(smallModels):
+#         #load model
+#         testNeuralprocess = NeuralProcess(x_dim, y_dim, r_dim, z_dim, h_dim)
+#         testModelPath = r'D:\PycharmProjects\ANP\neural-processes\trained_models\age_estimation\smallTrained\smallTrained' + str(idx) + r'.ckpt'
+#         testNeuralprocess.load_state_dict(torch.load(testModelPath))
+#         testNeuralprocess.training = False
+#
+#         resultsOnPretrainedModel = []
+#         for x_target, y_target in testData_loader:
+#             test_target = y_target
+#             avg_mu = 0
+#             for i in range(10):
+#                 p_y_pred = testNeuralprocess(x_context, y_context, x_target)
+#                 # Extract mean of distribution
+#                 mu = p_y_pred.loc.detach()
+#                 avg_mu += mu
+#             avg_mu = avg_mu / 10
+#             avg_mu = avg_mu.view(18)
+#             resultsOnPretrainedModel.append(avg_mu.tolist())
+#         resultsOnPretrainedModelsList.append(resultsOnPretrainedModel)
+#
+#     resultsOnPretrainedModels = []
+#     for i in range(num_of_test_images):
+#         resultsWithSinglePerson = []
+#         for list in resultsOnPretrainedModelsList:
+#             resultsWithSinglePerson.append(list[0][i])
+#         resultsOnPretrainedModels.append(resultsWithSinglePerson)
+#     resultsOnPretrainedModels = torch.FloatTensor(resultsOnPretrainedModels)
+#     return resultsOnPretrainedModels
