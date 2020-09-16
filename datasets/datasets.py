@@ -4,9 +4,150 @@ import os
 from math import pi
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
+import scipy.io as sio
 
 # from model.NeuralProcessModel import NeuralProcess
 # from trainer import NeuralProcessTrainer
+
+class TrainFeatureData(Dataset):
+    """
+    Dataset of face feature vectors extracted from FG-NET by FaceNet dimension reduction.
+    size of pair (x,y): size of x is 2048, size of y is 1
+
+    Parameters
+    ----------
+
+    featureVectors:
+        each of featureVectors is (x,y)
+        x.size():
+        data from extracted feature vector pre-processed by FaceNet
+
+    num_samples: num of people in dataset
+
+    num_points: num_of_images of each people
+
+    index: select correspoinding data for computing specific people's trained model
+
+    """
+
+    def __init__(self, num_of_people=82, num_of_images=18, index=None):
+        self.num_of_people = num_of_people
+        self.num_of_images = num_of_images
+        # self.x_dim = 2048  # x and y dim are fixed for this dataset.
+        self.x_dim = 512 # feature extraction by facenet-pytorch
+        self.y_dim = 1
+
+        self.indexing = index
+        self.featureVectors = []
+
+        # filePath = r'./datasets/csv/FeatureVector'
+        # csvs = os.listdir(filePath)
+        # FeatureCSVs = map(lambda x: os.path.join(filePath, x), csvs)
+        # featureVectors size():
+        # (#people(82),#image of each person(18),#features in each image(2048))
+
+        # num_of_images = 999
+        # embeddings['embeddings'].shape = (999, 512)
+        # len(list(embeddings['names'])) = 999
+        embeddings = sio.loadmat('face_embedding.mat')
+        for i in range(self.num_of_people):
+            featureVector = embeddings['embeddings'][i]
+            # featureTensor = torch.FloatTensor(featureVector)
+            idx = int(embeddings['names'][i][0:3])
+            age = int(embeddings['names'][i][4:6])
+            if index is not None:
+                if idx == index:
+                    self.featureVectors.append((featureVector, age))
+            else:
+                self.featureVectors.append((featureVector, age))
+        # for idx, root_dir in enumerate(FeatureCSVs):
+        #     ageVecotr, featureVector = readFromCSV(root_dir)
+        #     ageTensor = torch.FloatTensor(ageVecotr).unsqueeze(1)
+        #     print('''''''''''''''''''''''''')
+        #     print(idx)
+        #     print(root_dir)
+        #     featureTensor = torch.FloatTensor(featureVector)
+        #     if index is not None:
+        #         if idx == index:
+        #             self.featureVectors.append((featureTensor, ageTensor))
+        #     else:
+        #         self.featureVectors.append((featureTensor, ageTensor))
+
+    def __getitem__(self, index):
+        return self.featureVectors[index]
+
+    def __len__(self):
+        # self.numsample == len(self.featureVectors)
+        if self.indexing is not None:
+            return 1
+        return self.num_of_people
+
+
+class TestFeatureData(Dataset):
+    """
+    Dataset of face feature vectors extracted from FG-NET by FaceNet dimension reduction.
+    size of pair (x,y): size of x is 2048, size of y is 1
+
+    Parameters
+    ----------
+
+    featureVectors:
+        each of featureVectors is (x,y)
+        x.size():
+        data from extracted feature vector pre-processed by FaceNet
+
+    num_samples: num of people in dataset
+
+    num_points: num_of_images of each people
+
+    index: select correspoinding data for computing specific people's trained model
+
+    """
+
+    def __init__(self, num_of_people=10):
+       # self.x_dim = 2048  # x and y dim are fixed for this dataset.
+        self.num_of_people = num_of_people
+        self.x_dim = 512 # feature extraction by facenet-pytorch
+        self.y_dim = 1
+
+        self.testVectors = []
+
+        # filePath = r'./datasets/csv/FeatureVector'
+        # csvs = os.listdir(filePath)
+        # FeatureCSVs = map(lambda x: os.path.join(filePath, x), csvs)
+        # featureVectors size():
+        # (#people(82),#image of each person(18),#features in each image(2048))
+
+        # num_of_images = 999
+        # embeddings['embeddings'].shape = (999, 512)
+        # len(list(embeddings['names'])) = 999
+        embeddings = sio.loadmat('face_embedding.mat')
+        for i in range(self.num_of_people):
+            testVector = embeddings['embeddings'][-1 - i]
+            # featureTensor = torch.FloatTensor(featureVector)
+            idx = int(embeddings['names'][i][0:3])
+            age = int(embeddings['names'][i][4:6])
+            self.testVectors.append((testVector, age))
+        # for idx, root_dir in enumerate(FeatureCSVs):
+        #     ageVecotr, featureVector = readFromCSV(root_dir)
+        #     ageTensor = torch.FloatTensor(ageVecotr).unsqueeze(1)
+        #     print('''''''''''''''''''''''''')
+        #     print(idx)
+        #     print(root_dir)
+        #     featureTensor = torch.FloatTensor(featureVector)
+        #     if index is not None:
+        #         if idx == index:
+        #             self.featureVectors.append((featureTensor, ageTensor))
+        #     else:
+        #         self.featureVectors.append((featureTensor, ageTensor))
+
+    def __getitem__(self, index):
+        return self.testVectors[index]
+
+    def __len__(self):
+        # self.numsample == len(self.featureVectors)
+
+        return len(self.testVectors)
 
 
 class FaceFeatureData(Dataset):
@@ -30,7 +171,7 @@ class FaceFeatureData(Dataset):
 
     """
 
-    def __init__(self,num_of_people=82,num_of_images=18,index = None):
+    def __init__(self, num_of_people=82, num_of_images=18, index=None):
         self.num_samples = num_of_people
         self.num_points = num_of_images
         self.x_dim = 2048  # x and y dim are fixed for this dataset.
@@ -49,7 +190,7 @@ class FaceFeatureData(Dataset):
             featureTensor = torch.FloatTensor(featureVector)
             if index is not None:
                 if idx == index:
-                    self.featureVectors.append((featureTensor,ageTensor))
+                    self.featureVectors.append((featureTensor, ageTensor))
             else:
                 self.featureVectors.append((featureTensor, ageTensor))
 
@@ -57,10 +198,11 @@ class FaceFeatureData(Dataset):
         return self.featureVectors[index]
 
     def __len__(self):
-        #self.numsample == len(self.featureVectors)
+        # self.numsample == len(self.featureVectors)
         if self.indexing is not None:
             return 1
         return self.num_samples
+
 
 class FaceFeatureTestData(Dataset):
     """
@@ -68,8 +210,7 @@ class FaceFeatureTestData(Dataset):
     size of pair (x,y): size of x is 2048, size of y is 1
     """
 
-    def __init__(self,testFilePath = r'D:\PycharmProjects\ANP\neural-processes\datasets\TestFeatureVector'):
-
+    def __init__(self, testFilePath=r'./datasets/TestFeatureVector'):
         self.x_dim = 2048  # x and y dim are fixed for this dataset.
         self.y_dim = 1
 
@@ -86,8 +227,9 @@ class FaceFeatureTestData(Dataset):
         return self.testVectors[index]
 
     def __len__(self):
-        #self.numsample == len(self.featureVectors)
+        # self.numsample == len(self.featureVectors)
         return len(self.testVectors)
+
 
 class SineData(Dataset):
     """
@@ -110,6 +252,7 @@ class SineData(Dataset):
     num_points : int
         Number of points at which to evaluate f(x) for x in [-pi, pi].
     """
+
     def __init__(self, amplitude_range=(-1., 1.), shift_range=(-.5, .5),
                  num_samples=1000, num_points=100):
         self.amplitude_range = amplitude_range
@@ -140,19 +283,21 @@ class SineData(Dataset):
     def __len__(self):
         return self.num_samples
 
+
 def readFromCSV(root_dir):
     FaceFeatureData = pd.read_csv(root_dir, names=['age', 'featureVector'])
     ageVector = []
     featureVector = []
     for i in range(FaceFeatureData.shape[0]):
-        age = FaceFeatureData.iloc[i,0]
+        age = FaceFeatureData.iloc[i, 0]
         x = FaceFeatureData.iloc[i, 1]
         ageVector.append(age)
-        featureVector.append(toFeatureVector(x,i))
+        featureVector.append(toFeatureVector(x, i))
     return ageVector, featureVector
 
-def toFeatureVector(x,row_num):
-    x_elements = x[2:len(x)-2]
+
+def toFeatureVector(x, row_num):
+    x_elements = x[2:len(x) - 2]
     elements = x_elements.split(' ')
     features = []
     for idx, e in enumerate(elements):
@@ -163,7 +308,7 @@ def toFeatureVector(x,row_num):
                 features.append(float(e))
             except Exception as ex:
                 print(idx)
-                print('row_num: ',row_num)
+                print('row_num: ', row_num)
                 print(ex)
     return features
 
