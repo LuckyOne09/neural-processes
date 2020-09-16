@@ -181,7 +181,7 @@ class NeuralProcessEncoder(BaseModel):
         r_i : torch.Tensor
             Shape (batch_size, num_points, r_dim)
         """
-        return torch.mean(r_i, dim=1)
+        return torch.mean(r_i, dim=0)
 
     def xy_to_mu_sigma(self, x, y):
         """
@@ -196,14 +196,14 @@ class NeuralProcessEncoder(BaseModel):
         y : torch.Tensor
             Shape (batch_size, num_points, y_dim)
         """
-        batch_size, num_points, _ = x.size()
+        batch_size, _ = x.size()
         # Flatten tensors, as encoder expects one dimensional inputs
-        x_flat = x.view(batch_size * num_points, self.x_dim)
-        y_flat = y.contiguous().view(batch_size * num_points, self.y_dim)
+        x_flat = x.view(batch_size, self.x_dim)
+        y_flat = y.contiguous().view(batch_size, self.y_dim)
         # Encode each point into a representation r_i
         r_i_flat = self.xy_to_r(x_flat, y_flat)
         # Reshape tensors into batches
-        r_i = r_i_flat.view(batch_size, num_points, self.r_dim)
+        r_i = r_i_flat.view(batch_size, self.r_dim)
         # Aggregate representations r_i into a single representation r
         r = self.aggregate(r_i)
         # Return parameters of distribution
@@ -236,9 +236,9 @@ class NeuralProcessEncoder(BaseModel):
         shown to work best empirically.
         """
         # Infer quantities from tensor dimensions
-        batch_size, num_context, x_dim = x_context.size()
-        _, num_target, _ = x_target.size()
-        _, _, y_dim = y_context.size()
+        num_context, x_dim = x_context.size()
+        num_target, _ = x_target.size()
+        y_dim = y_context.size()
 
         if self.training:
             # Encode target and context (context needs to be encoded to
@@ -308,9 +308,9 @@ class NeuralProcessDecoder(BaseModel):
         shown to work best empirically.
         """
         # Infer quantities from tensor dimensions
-        batch_size, num_context, x_dim = x_context.size()
-        _, num_target, _ = x_target.size()
-        _, _, y_dim = y_context.size()
+        num_context, x_dim = x_context.size()
+        num_target, _ = x_target.size()
+        y_dim = y_context.size()
 
         # if self.training:
             # Get parameters of output distribution

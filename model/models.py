@@ -67,7 +67,7 @@ class MuSigmaEncoder(BaseModel):
         self.r_dim = r_dim
         self.z_dim = z_dim
 
-        self.r_to_hidden = nn.Linear(r_dim, r_dim)
+        self.r_to_hidden = nn.Linear(r_dim, r_dim) #(50, 50)
         self.hidden_to_mu = nn.Linear(r_dim, z_dim)
         self.hidden_to_sigma = nn.Linear(r_dim, z_dim)
 
@@ -134,21 +134,21 @@ class Decoder(BaseModel):
         Returns mu and sigma for output distribution. Both have shape
         (batch_size, num_points, y_dim).
         """
-        batch_size, num_points, _ = x.size()
+        batch_size, _ = x.size()
         # Repeat z, so it can be concatenated with every x. This changes shape
         # from (batch_size, z_dim) to (batch_size, num_points, z_dim)
-        z = z.unsqueeze(1).repeat(1, num_points, 1)
+        z = z.unsqueeze(1).repeat(1, batch_size)
         # Flatten x and z to fit with linear layer
-        x_flat = x.view(batch_size * num_points, self.x_dim)
-        z_flat = z.view(batch_size * num_points, self.z_dim)
+        x_flat = x.view(batch_size, self.x_dim)
+        z_flat = z.view(batch_size, self.z_dim)
         # Input is concatenation of z with every row of x
         input_pairs = torch.cat((x_flat, z_flat), dim=1)
         hidden = self.xz_to_hidden(input_pairs)
         mu = self.hidden_to_mu(hidden)
         pre_sigma = self.hidden_to_sigma(hidden)
         # Reshape output into expected shape
-        mu = mu.view(batch_size, num_points, self.y_dim)
-        pre_sigma = pre_sigma.view(batch_size, num_points, self.y_dim)
+        mu = mu.view(batch_size, self.y_dim)
+        pre_sigma = pre_sigma.view(batch_size, self.y_dim)
         # Define sigma following convention in "Empirical Evaluation of Neural
         # Process Objectives" and "Attentive Neural Processes"
         sigma = 0.1 + 0.9 * F.softplus(pre_sigma)
