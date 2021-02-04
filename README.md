@@ -1,19 +1,36 @@
-# 变动部分  
+# Age Estimation based on Multi-task Neural Process
 
-model/models  
-增加了Simi_repsentation 这个就是转换repsentation的FC  
-修改了原来的MergeNet 现在这个只用来根据object embedding和repsentation来计算出权重  
-  
-新增trainer/train_simi_rep  
-这里第一部分是加载general encoder 使用 xy_to_r  
-第二部分是对Simi_repsentation 进行训练  
-其中cnt是用来控制训练和检测的数据集的，每次只抽出一个人来进行检测，其他人用来训练  
-context表示每次用的训练集    
-target_x表示每次用的检测集  
-target_y表示检测集的真实年龄  
-x表示检测集的原始特征  
-pred_age是乘以权重后的预测年龄  
+Pytorch implementation of [Neural Processes](https://arxiv.org/abs/1807.01622). This repo follows the
+best practices defined in [Empirical Evaluation of Neural Process Objectives](http://bayesiandeeplearning.org/2018/papers/92.pdf).
 
-# 可能的问题  
-1.loss.backward(retain_graph=True) 计算图里可能有分支（我不知道这个会不会有影响，但是不加这个epoch=1就会报错）  
-2.我学习率高一点训练的时候loss很快就会变成nan，可能计算相似度的地方exp还是有问题，现在一般是e^20+  
+## Training pipeline
+
+We sort all the images into groups by each person. And use data augmentation to make sure the number of images for each person are same. 
+
+Each group of face images is denoted as Person<sub>i</sub>.
+
+Training Set 1 consists of N group of face images (Person<sub>i...n</sub>)
+
+Training Set 2 consists of M groups of face images(Person<sub>n+1...n+m</sub>) which are all different from the components in Training Set 1.
+
+### Training Round 1
+
+Firstly, using the Training Set 1 to train the original Neural Process to get the Pretrained Model 1 which we denote as PM1. We consider each person as a different task in this process. In this round, we used the whole training set to make NP learn all tasks together. In this way, the Pretrained Model we get contains a general encoder which shares the same parameters in different tasks. 
+
+![](./figures/training_round_1.png)
+
+### Training Round 2
+
+Then we train the PM1 separately with different Person<sub>i</sub> in Training Set 1 to get corresponding model PM<sub>2-i</sub>. In this process, the encoder part is fixed, we just use different task to train the decoder part. According to this, each PM<sub>2-i</sub> we get shares the same encoder part but possesses their unique decoder.
+
+![](./figures/training_round_2.png)
+
+
+
+### Training Round 3
+
+In order to do the age estimation with all these pretrained model, there should be a Merge Net. The Merge Net is here to learn how to compute the similarity between the input images and our training subjects, and then provide the weight to each result we get from PM<sub>2-i</sub>. The sum of the products of weights and predictions we get from PM<sub>2-i</sub> will be the final estimating age.
+
+![](./figures/training_round_3.png)
+
+### Multi-task Neural Process
