@@ -34,8 +34,8 @@ In order to do the age estimation with all these pretrained model, there should 
 ![](./figures/training_round_3.png)
 
 ### Multi-task Neural Process
-![](./Model Structure1.png)  
-![](./Model Structure2.png)  
+![](./model1.png)  
+![](./model2.png)  
 ![](./exp1.png)  
 ![](./exp2.png)  
 ![](./exp3.png)  
